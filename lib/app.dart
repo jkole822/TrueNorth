@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:true_north/screens/home_screen.dart';
 import 'package:true_north/screens/login_screen.dart';
 import 'package:true_north/screens/register_screen.dart';
 import 'package:true_north/screens/splash_screen.dart';
@@ -40,6 +41,25 @@ class _TrueNorthState extends State<TrueNorthApp> {
             foregroundColor: Colors.white,
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12.0,
+              horizontal: 16.0,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            side: const BorderSide(width: 2.0),
+            textStyle: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Color(0xFF1976D2),
+            textStyle: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
@@ -70,11 +90,30 @@ class _TrueNorthState extends State<TrueNorthApp> {
             borderSide: BorderSide(color: Color(0xFF26A69A), width: 2),
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(
+              vertical: 12.0,
+              horizontal: 16.0,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            side: const BorderSide(width: 2.0, color: Colors.white),
+            textStyle: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
         snackBarTheme: SnackBarThemeData(
           backgroundColor: Color(0xFF424242),
           contentTextStyle: TextStyle(color: Colors.white),
         ),
-        textTheme: TextTheme(),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            textStyle: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
       ),
       themeMode: _themeMode,
       initialRoute: '/',
@@ -82,6 +121,7 @@ class _TrueNorthState extends State<TrueNorthApp> {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }
