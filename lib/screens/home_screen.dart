@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 // import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:true_north/screens/create_decision_screen.dart';
 import 'package:true_north/main.dart';
+import 'package:true_north/utils/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic>? _decisions;
   bool _loading = true;
 
-  Future<void> _fetchDecisions() async {
+  Future<void> _fetchDecisions({int limit = 10, int offset = 0}) async {
     final result = await client.value.query(
       QueryOptions(
         document: gql('''
@@ -25,10 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
           decisions {
             id
             question
+            progress
             createdAt
           }
         }
       '''),
+        variables: {'limit': limit, 'offset': offset},
         fetchPolicy: FetchPolicy.networkOnly,
       ),
     );
@@ -115,37 +118,52 @@ class _HomeScreenState extends State<HomeScreen> {
                         bottom: BorderSide(color: Colors.grey.shade300),
                       ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
                                 decision['question'],
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
+                                overflow: TextOverflow.visible,
+                                softWrap: true,
                               ),
-                              const SizedBox(height: 8),
-                              Align(
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  '${DateFormat('yMMMd').format(DateTime.parse(decision['createdAt']).toLocal())}\n'
-                                  '${DateFormat('h:mm a').format(DateTime.parse(decision['createdAt']).toLocal())}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.chevron_right, size: 28),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.chevron_right, size: 28),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${DateFormat('yMMMd').format(DateTime.parse(decision['createdAt']).toLocal())}\n'
+                              '${DateFormat('h:mm a').format(DateTime.parse(decision['createdAt']).toLocal())}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            Chip(
+                              label: Text(capitalize(decision['progress'])),
+                              labelStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),

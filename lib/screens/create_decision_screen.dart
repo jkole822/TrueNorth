@@ -38,9 +38,7 @@ class _CreateDecisionScreenState extends State<CreateDecisionScreen> {
 
   final _mutation = """
     mutation CreateDecision(\$input: DecisionInput!) {
-      createDecision(input: \$input) {
-        id
-      }
+      createDecision(input: \$input)
     }
   """;
 

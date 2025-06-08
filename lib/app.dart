@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:true_north/screens/home_screen.dart';
-import 'package:true_north/screens/login_screen.dart';
-import 'package:true_north/screens/register_screen.dart';
-import 'package:true_north/screens/splash_screen.dart';
-import 'package:true_north/screens/create_decision_screen.dart';
+import 'package:true_north/screens/screens.dart';
 
 class TrueNorthApp extends StatefulWidget {
   @override
