@@ -60,9 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
           onCompleted: (data) {
             final String? token = data?['login'] as String?;
             if (token != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Success!')));
               _onCompleted(token);
               Navigator.pushReplacementNamed(context, '/home');
             } else {

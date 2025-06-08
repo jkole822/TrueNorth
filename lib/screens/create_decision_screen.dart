@@ -36,50 +36,22 @@ class _CreateDecisionScreenState extends State<CreateDecisionScreen> {
   String? _selectedCategory;
   Set<String> _selectedEmotions = {};
 
-  String buildDecisionPrompt({
-    required String mainQuestion,
-    String? category,
-    List<String>? emotions,
-    String? desiredOutcome,
-  }) {
-    final buffer = StringBuffer();
-
-    if (category != null && category.isNotEmpty) {
-      buffer.writeln("Category: $category.");
-    }
-
-    if (emotions != null && emotions.isNotEmpty) {
-      final emotionList = emotions.join(', ');
-      buffer.writeln("Current emotional state: $emotionList.");
-    }
-
-    if (desiredOutcome != null && desiredOutcome.isNotEmpty) {
-      buffer.writeln("What I hope to feel or achieve: $desiredOutcome.");
-    }
-
-    buffer.writeln("Here is my question: $mainQuestion");
-
-    return buffer.toString();
-  }
-
   final _mutation = """
     mutation CreateDecision(\$input: DecisionInput!) {
       createDecision(input: \$input) {
-        answer
+        id
       }
     }
   """;
 
   void _onCreateDecision(RunMutation runMutation) {
-    final question = buildDecisionPrompt(
-      mainQuestion: _questionController.text,
-      category: _selectedCategory,
-      emotions: _selectedEmotions.toList(),
-      desiredOutcome: _desiredOutcomeController.text,
-    );
-
     runMutation({
-      'input': {'question': question},
+      'input': {
+        'category': _selectedCategory,
+        'desiredOutcome': _desiredOutcomeController.text,
+        'emotions': _selectedEmotions.toList(),
+        'question': _questionController.text,
+      },
     });
   }
 
@@ -94,6 +66,7 @@ class _CreateDecisionScreenState extends State<CreateDecisionScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Pointing in right direction!')),
             );
+            Navigator.pop(context, 'refresh');
           },
           onError: (error) {
             ScaffoldMessenger.of(context).showSnackBar(
