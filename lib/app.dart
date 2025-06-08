@@ -3,6 +3,7 @@ import 'package:true_north/screens/home_screen.dart';
 import 'package:true_north/screens/login_screen.dart';
 import 'package:true_north/screens/register_screen.dart';
 import 'package:true_north/screens/splash_screen.dart';
+import 'package:true_north/screens/create_decision_screen.dart';
 
 class TrueNorthApp extends StatefulWidget {
   @override
@@ -122,6 +123,7 @@ class _TrueNorthState extends State<TrueNorthApp> {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
+        '/decision/create': (context) => const CreateDecisionScreen(),
       },
     );
   }

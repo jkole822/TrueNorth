@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:true_north/main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,6 +33,18 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  void _onCompleted(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('jwt', token);
+    _storage.write(key: 'jwt', value: token);
+    client.value = GraphQLClient(
+      link: AuthLink(
+        getToken: () async => 'Bearer $token',
+      ).concat(HttpLink('https://truenorthserver.fly.dev/graphql')),
+      cache: GraphQLCache(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
@@ -49,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(const SnackBar(content: Text('Success!')));
-              _storage.write(key: 'jwt', value: token);
+              _onCompleted(token);
               Navigator.pushReplacementNamed(context, '/home');
             } else {
               ScaffoldMessenger.of(
