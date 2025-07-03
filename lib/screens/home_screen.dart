@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:true_north/screens/create_decision_screen.dart';
+import 'package:true_north/screens/screens.dart';
 import 'package:true_north/main.dart';
 import 'package:true_north/utils/utils.dart';
 
@@ -13,25 +14,39 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static const itemsPerPage = 10;
   List<dynamic>? _decisions;
   bool _loading = true;
+  int _page = 1;
+  int _total = 0;
 
-  Future<void> _fetchDecisions({int limit = 10, int offset = 0}) async {
+  bool get shouldShowPagination => (_total / itemsPerPage).ceil() > 1;
+  bool get shouldEnableNextPagination =>
+      _decisions != null && _decisions!.length == itemsPerPage;
+  bool get shouldEnablePreviousPagination => _page != 1;
+
+  Future<void> _fetchDecisions() async {
     setState(() => _loading = true);
 
     final result = await client.value.query(
       QueryOptions(
         document: gql('''
-        query GetDecisions {
-          decisions {
-            id
-            question
-            progress
-            createdAt
+        query GetDecisions(\$limit: Int!, \$offset: Int!) {
+          decisions(limit: \$limit, offset: \$offset) {
+            decisions {
+              id
+              question
+              progress
+              createdAt
+            }
+            total
           }
         }
       '''),
-        variables: {'limit': limit, 'offset': offset},
+        variables: {
+          'limit': itemsPerPage,
+          'offset': (_page - 1) * itemsPerPage,
+        },
         fetchPolicy: FetchPolicy.networkOnly,
       ),
     );
@@ -39,9 +54,26 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _loading = false;
       if (!result.hasException) {
-        _decisions = result.data?['decisions'];
+        _decisions = result.data?['decisions']['decisions'];
+        _total = result.data?['decisions']['total'];
       }
     });
+  }
+
+  void onNext() {
+    setState(() {
+      if (shouldEnableNextPagination) _page++;
+    });
+
+    _fetchDecisions();
+  }
+
+  void onPrevious() {
+    setState(() {
+      if (shouldEnablePreviousPagination) _page--;
+    });
+
+    _fetchDecisions();
   }
 
   @override
@@ -53,8 +85,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("TrueNorth")),
-      body: Padding(
+      appBar: AppBar(
+        title: const Text("TrueNorth"),
+        actions: [
+          IconButton(
+            color: Theme.of(context).primaryColor,
+            icon: const Icon(Icons.logout),
+            tooltip: 'Log Out',
+            onPressed: () async {
+              const storage = FlutterSecureStorage();
+              await storage.write(key: 'jwt', value: null);
+
+              if (!context.mounted) return;
+
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
@@ -93,6 +142,25 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 24.0),
+            if (!_loading && shouldShowPagination)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: shouldEnablePreviousPagination
+                        ? onPrevious
+                        : null,
+                    icon: Icon(Icons.chevron_left),
+                    tooltip: 'Previous Page',
+                  ),
+                  SizedBox(width: 16),
+                  IconButton(
+                    onPressed: shouldEnableNextPagination ? onNext : null,
+                    icon: Icon(Icons.chevron_right),
+                    tooltip: 'Next Page',
+                  ),
+                ],
+              ),
             if (_loading)
               const Center(child: CircularProgressIndicator())
             else if (_decisions != null && _decisions!.isNotEmpty)
@@ -108,11 +176,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () {
-                      // TODO: Navigate to DecisionDetailScreen when ready
-                      // Navigator.push(context, MaterialPageRoute(
-                      //   builder: (context) => DecisionDetailScreen(id: decision['id']),
-                      // ));
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DecisionScreen(id: decision['id']),
+                        ),
+                      );
+
+                      _fetchDecisions();
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:true_north/main.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _storage = const FlutterSecureStorage();
 
   final _mutation = """
     mutation LoginUser(\$input: LoginInput!) {
@@ -34,9 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onCompleted(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('jwt', token);
-    _storage.write(key: 'jwt', value: token);
+    final storage = const FlutterSecureStorage();
+    storage.write(key: 'jwt', value: token);
     client.value = GraphQLClient(
       link: AuthLink(
         getToken: () async => 'Bearer $token',
@@ -60,7 +57,10 @@ class _LoginScreenState extends State<LoginScreen> {
         : 'assets/images/logo_light.png';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text('Login'),
+      ),
       body: Mutation(
         options: MutationOptions(
           document: gql(_mutation),

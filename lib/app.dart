@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:true_north/screens/screens.dart';
+import 'package:true_north/utils/utils.dart';
 
 class TrueNorthApp extends StatefulWidget {
   @override
@@ -116,10 +117,13 @@ class _TrueNorthState extends State<TrueNorthApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/register': (context) => const RegisterScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/decision/create': (context) => const CreateDecisionScreen(),
+        '/login': (context) =>
+            InverseAuthGate(unauthenticatedChild: const LoginScreen()),
+        '/register': (context) =>
+            InverseAuthGate(unauthenticatedChild: const RegisterScreen()),
+        '/home': (context) => AuthGate(authenticatedChild: const HomeScreen()),
+        '/decision/create': (context) =>
+            AuthGate(authenticatedChild: const CreateDecisionScreen()),
       },
     );
   }

@@ -55,6 +55,11 @@ class _CreateDecisionScreenState extends State<CreateDecisionScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _desiredOutcomeController.dispose();
     _questionController.dispose();
